@@ -13,3 +13,6 @@
 * `q_bestWinePerRange` - will return 5 best wines per price range (demonstration of usage aggregated values as properties for next grouping)
 
 * `q_bestWineRate` - will show which country have best wine quality + average price (personal interest)
+
+## Hints
+* For readable queries check `wines.system.orig.json`
