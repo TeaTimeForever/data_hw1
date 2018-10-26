@@ -1,0 +1,22 @@
+[
+{ 
+    "_id" : "report_TasterExpirience", 
+    "value" : "function() {db.getCollection('wines').mapReduce(function () {emit(this.taster_name, this.price);},function(k, v) {  return v.length},{ 'query':{'taster_name': {$ne: null}}, 'out':'report1_taster_expirience'});}"
+},
+{ 
+    "_id" : "q_relationBetweenQualityAndPrice", 
+    "value" : "function () {return db.getCollection('wines').aggregate([{$match: {'price': {$gt: 0}}},{$project: {'_id': 0,'price-range': {$concat: [{ $cond: [{$lte: ['$price', 0]}, 'price not described', '']}, { $cond: [{$and:[ {$gt:['$price', 0 ]}, {$lt: ['$price', 7]}]}, 'Under 7$', ''] },{ $cond: [{$and:[ {$gte:['$price',7]}, {$lt:['$price', 12]}]}, '7$ - 12$', '']},{ $cond: [{$and:[ {$gte:['$price',12]}, {$lt:['$price', 20]}]}, '12$ - 20$', '']},{ $cond: [{$and:[ {$gte:['$price',20]}, {$lt:['$price', 50]}]}, '20$ - 50$', '']},{ $cond: [{$and:[ {$gte:['$price',50]}, {$lt:['$price', 200]}]}, '50$ - 200$', '']},{ $cond: [{$and:[ {$gte:['$price',200]}, {$lt:['$price', 1000]}]}, '200$ - 1000$', '']},{ $cond: [{$gte:['$price',1000]}, 'Over 1000$', '']}]},'points': 1}},{$group: { '_id' : '$price-range', 'average points':  {$avg: {$toInt: '$points'}},'count':  { $sum: 1 }}}])}"
+},
+{ 
+    "_id" : "q_bestWinePerRange", 
+    "value" : "function() {return db.getCollection('wines').aggregate([{$match: {'price': {$gt: 0}}},{$project: {'_id': 0,'price-range': {$concat: [{ $cond: [{$lte: ['$price', 0]}, 'price not described', '']}, { $cond: [{$and:[ {$gt:['$price', 0 ]}, {$lt: ['$price', 7]}]}, 'Under 7$', ''] },{ $cond: [{$and:[ {$gte:['$price',7]}, {$lt:['$price', 12]}]}, '7$ - 12$', '']},{ $cond: [{$and:[ {$gte:['$price',12]}, {$lt:['$price', 20]}]}, '12$ - 20$', '']},{ $cond: [{$and:[ {$gte:['$price',20]}, {$lt:['$price', 50]}]}, '20$ - 50$', '']},{ $cond: [{$and:[ {$gte:['$price',50]}, {$lt:['$price', 200]}]}, '50$ - 200$', '']},{ $cond: [{$and:[ {$gte:['$price',200]}, {$lt:['$price', 1000]}]}, '200$ - 1000$', '']},{ $cond: [{$gte:['$price',1000]}, 'Over 1000$', '']}]},'title': 1,'points': 1}},{ $sort : { 'points' : -1 } },{$group: { '_id' : '$price-range', 'best_points': {$max: {$toInt: '$points'}},'best_wine': {$push: '$title'}}},{ '$project': { 'best_wine': { '$slice': [ '$best_wine', 5 ] },'best_points': '$best_points','preview': 1,'submitted': 1}},])}"
+},
+{ 
+    "_id" : "q_getMostExpiriencedTasters", 
+    "value" : "function () {return db.getCollection('report1_taster_expirience').find({}).sort({value: -1}).limit(5)}"
+},
+{ 
+    "_id" : "q_bestWineRate", 
+    "value" : "function () {return db.getCollection('wines').aggregate([{$group: { '_id' : '$country', 'average_points':  { $avg: {$toInt: '$points'} },'average_price':  { $avg: '$price'},}},{$sort: {'average_points':-1}}])}"
+}
+]
